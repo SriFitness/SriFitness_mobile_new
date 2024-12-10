@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "446562789301",
+    "firebase_url": "https://srifitness-96c1b-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "srifitness-96c1b",
+    "storage_bucket": "srifitness-96c1b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:446562789301:android:08a85295960f80bf2e5bfc",
+        "android_client_info": {
+          "package_name": "com.example.srifitness_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9k0hwALPGJAxfIksIZV-nQVZoFTtbN0k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

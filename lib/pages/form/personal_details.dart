@@ -1,11 +1,15 @@
+// lib/pages/form/personal_details.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:srifitness_app/pages/form/medical_inquiry_1.dart';
 import 'package:srifitness_app/widget/colo_extension.dart';
-import 'package:srifitness_app/widget/custom_appbar.dart'; // Import for TextInputFormatter
+import 'package:srifitness_app/widget/custom_appbar.dart';
 
 class PersonalDetails extends StatefulWidget {
-  const PersonalDetails({super.key});
+  final Function(Map<String, dynamic>) onSave;
+
+  const PersonalDetails({super.key, required this.onSave});
 
   @override
   State<PersonalDetails> createState() => _PersonalDetailsState();
@@ -14,15 +18,18 @@ class PersonalDetails extends StatefulWidget {
 class _PersonalDetailsState extends State<PersonalDetails> {
   final _formKey = GlobalKey<FormState>();
   String? _selectedGender;
-  DateTime? _selectedDate; // Use nullable DateTime
-
-  final List<String> _genders = ['Male', 'Female', 'Other'];
+  DateTime? _selectedDate;
+  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _townController = TextEditingController();
+  final TextEditingController _telHomeController = TextEditingController();
+  final TextEditingController _telMobileController = TextEditingController();
+  final TextEditingController _emergencyContactController = TextEditingController();
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate:
-      _selectedDate ?? DateTime.now(), // Use current date if none selected
+      initialDate: _selectedDate ?? DateTime.now(),
       firstDate: DateTime(1900),
       lastDate: DateTime(2100),
     );
@@ -33,14 +40,37 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     }
   }
 
-  // Define a common TextStyle
   final TextStyle _textStyle = TextStyle(
-    fontSize: 16, // Set the font size here
-    color: TColor.textcolor, // Use your color definition here
+    fontSize: 16,
+    color: TColor.textcolor,
   );
 
-  // Error text color
   final Color _errorColor = Colors.red;
+
+  void _saveForm() {
+    if (_formKey.currentState?.validate() ?? false) {
+      // Collect form data
+      Map<String, dynamic> userInfoMap = {
+        'fullName': _fullNameController.text,
+        'dateOfBirth': _selectedDate?.toIso8601String(),
+        'gender': _selectedGender,
+        'address': _addressController.text,
+        'town': _townController.text,
+        'telHome': _telHomeController.text,
+        'telMobile': _telMobileController.text,
+        'emergencyContact': _emergencyContactController.text,
+      };
+
+      // Pass data to parent widget
+      widget.onSave(userInfoMap);
+
+      // Navigate to the next form
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => MedicalInquiry1(onSave: widget.onSave)),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +81,6 @@ class _PersonalDetailsState extends State<PersonalDetails> {
           padding: const EdgeInsets.only(left: 16, right: 16, top: 24),
           child: Form(
             key: _formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Column(
               children: <Widget>[
                 Text(
@@ -64,11 +93,13 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                 ),
                 SizedBox(height: 20),
                 TextFormField(
-                  style: _textStyle, // Apply common text style
+                  controller: _fullNameController,
+                  style: _textStyle,
                   decoration: InputDecoration(
                     labelText: 'Full Name',
                     errorStyle: TextStyle(color: _errorColor),
                   ),
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please Enter Your Full Name';
@@ -81,7 +112,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                   onTap: () => _selectDate(context),
                   child: AbsorbPointer(
                     child: TextFormField(
-                      style: _textStyle, // Apply common text style
+                      style: _textStyle,
                       decoration: InputDecoration(
                         labelText: 'Date of Birth',
                         suffixIcon: Icon(Icons.calendar_today),
@@ -90,8 +121,9 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                       controller: TextEditingController(
                         text: _selectedDate != null
                             ? '${_selectedDate!.toLocal()}'.split(' ')[0]
-                            : '', // Set empty if no date selected
+                            : '',
                       ),
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please select your date of birth';
@@ -106,14 +138,13 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                   value: _selectedGender,
                   decoration: InputDecoration(
                     labelText: 'Gender',
-                    labelStyle: _textStyle, // Apply common text style
+                    labelStyle: _textStyle,
                     errorStyle: TextStyle(color: _errorColor),
                   ),
-                  items: _genders.map((String gender) {
+                  items: ['Male', 'Female', 'Other'].map((String gender) {
                     return DropdownMenuItem<String>(
                       value: gender,
-                      child: Text(gender,
-                          style: _textStyle), // Apply common text style
+                      child: Text(gender, style: _textStyle),
                     );
                   }).toList(),
                   onChanged: (String? newValue) {
@@ -121,6 +152,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                       _selectedGender = newValue;
                     });
                   },
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: (value) {
                     if (value == null) {
                       return 'Please select your gender';
@@ -130,11 +162,13 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                 ),
                 const SizedBox(height: 20),
                 TextFormField(
-                  style: _textStyle, // Apply common text style
+                  controller: _addressController,
+                  style: _textStyle,
                   decoration: InputDecoration(
                     labelText: 'Address',
                     errorStyle: TextStyle(color: _errorColor),
                   ),
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your address';
@@ -144,11 +178,13 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                 ),
                 const SizedBox(height: 20),
                 TextFormField(
-                  style: _textStyle, // Apply common text style
+                  controller: _townController,
+                  style: _textStyle,
                   decoration: InputDecoration(
                     labelText: 'Town',
                     errorStyle: TextStyle(color: _errorColor),
                   ),
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your town';
@@ -158,7 +194,8 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                 ),
                 const SizedBox(height: 20),
                 TextFormField(
-                  style: _textStyle, // Apply common text style
+                  controller: _telHomeController,
+                  style: _textStyle,
                   decoration: InputDecoration(
                     labelText: 'Tel Home',
                     errorStyle: TextStyle(color: _errorColor),
@@ -169,6 +206,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                     LengthLimitingTextInputFormatter(10),
                     _PhoneNumberInputFormatter(),
                   ],
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your home telephone number';
@@ -181,7 +219,8 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                 ),
                 const SizedBox(height: 20),
                 TextFormField(
-                  style: _textStyle, // Apply common text style
+                  controller: _telMobileController,
+                  style: _textStyle,
                   decoration: InputDecoration(
                     labelText: 'Tel Mobile',
                     errorStyle: TextStyle(color: _errorColor),
@@ -192,6 +231,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                     LengthLimitingTextInputFormatter(10),
                     _PhoneNumberInputFormatter(),
                   ],
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your mobile telephone number';
@@ -204,7 +244,8 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                 ),
                 SizedBox(height: 20),
                 TextFormField(
-                  style: _textStyle, // Apply common text style
+                  controller: _emergencyContactController,
+                  style: _textStyle,
                   decoration: InputDecoration(
                     labelText: 'Emergency Contact',
                     errorStyle: TextStyle(color: _errorColor),
@@ -215,6 +256,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                     LengthLimitingTextInputFormatter(10),
                     _PhoneNumberInputFormatter(),
                   ],
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter an emergency contact';
@@ -231,19 +273,9 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                   child: Align(
                     alignment: Alignment.centerRight,
                     child: ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState?.validate() ?? false) {
-                          // Navigate to the MedicalInquiry page
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => MedicalInquiry1()),
-                          );
-                        }
-                      },
+                      onPressed: _saveForm,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                        TColor.maincolor, // Set the background color
+                        backgroundColor: TColor.maincolor,
                       ),
                       child: Text(
                         'Next',
@@ -272,10 +304,8 @@ class _PhoneNumberInputFormatter extends TextInputFormatter {
       ) {
     String text = newValue.text;
 
-    // Remove any non-digit characters
     text = text.replaceAll(RegExp(r'[^\d]'), '');
 
-    // Ensure only 10 digits are allowed
     if (text.length > 10) {
       text = text.substring(0, 10);
     }

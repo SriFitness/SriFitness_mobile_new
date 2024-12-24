@@ -2,7 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:srifitness_app/pages/bottomnav.dart';
 import 'package:srifitness_app/pages/forgotpassword.dart';
+import 'package:srifitness_app/pages/form/personal_details.dart';
 import 'package:srifitness_app/pages/signup.dart';
+import 'package:srifitness_app/service/shared_pref.dart';
 import 'package:srifitness_app/widget/widget_support.dart';
 
 class Login extends StatefulWidget {
@@ -24,7 +26,19 @@ class _LoginState extends State<Login> {
     try {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
-      Navigator.push(context, MaterialPageRoute(builder: (context)=> BottomNav()));
+
+      // Save email and password to local storage
+      await SharedPreferenceHelper().saveUserEmail(email);
+      await SharedPreferenceHelper().saveUserPassword(password);
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PersonalDetails(onSave: (data) {
+            // Handle the saved data here
+          }),
+        ),
+      );
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -114,9 +128,9 @@ class _LoginState extends State<Login> {
                                   ),
                                   TextFormField(
                                     controller: useremailcontroller,
-                                    validator: (value){
-                                      if(value==null|| value.isEmpty){
-                                        return 'Please Enter Email';
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please Enter E-mail';
                                       }
                                       return null;
                                     },
@@ -131,7 +145,7 @@ class _LoginState extends State<Login> {
                                   TextFormField(
                                     controller:userpasswordcontroller,
                                     validator: (value){
-                                      if(value==null|| value.isEmpty){
+                                      if (value == null || value.isEmpty) {
                                         return 'Please Enter Password';
                                       }
                                       return null;
@@ -146,53 +160,44 @@ class _LoginState extends State<Login> {
                                     height: 20.0,
                                   ),
                                   GestureDetector(
-                                    onTap: (){
-                                      Navigator.push(context, MaterialPageRoute(builder: (context)=> ResetPassword()));
+                                    onTap: () {
+                                      if (_formkey.currentState!.validate()) {
+                                        setState(() {
+                                          email = useremailcontroller.text;
+                                          password = userpasswordcontroller.text;
+                                        });
+                                        userLogin();
+                                      }
                                     },
                                     child: Container(
-                                        alignment: Alignment.topRight,
-                                        child: Text(
-                                          "Forgot Password?",
-                                          style: AppWidget.semiBoldTextFeildStyle(),
-                                        )),
+                                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                                        width: 200,
+                                        decoration: BoxDecoration(
+                                            color: Color(0Xffff5722),
+                                            borderRadius: BorderRadius.circular(20)),
+                                        child: Center(
+                                            child: Text(
+                                              "LOGIN",
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 18.0,
+                                                  fontFamily: 'Poppins1',
+                                                  fontWeight: FontWeight.bold),
+                                            ))),
                                   ),
                                   SizedBox(
                                     height: 80.0,
                                   ),
-                                  // Login button
                                   GestureDetector(
-                                    onTap: (){
-                                      if(_formkey.currentState!.validate()){
-                                        //form is valid, process data
-                                        setState(() {
-                                          email= useremailcontroller.text;
-                                          password= userpasswordcontroller.text;
-                                        });
-                                      }
-                                      userLogin();
+                                    onTap: () {
+                                      Navigator.push(context,
+                                          MaterialPageRoute(builder: (context) => SignUp()));
                                     },
-                                      child: Material(
-                                        elevation: 5.0,
-                                        borderRadius: BorderRadius.circular(20),
-                                        child: Container(
-                                          padding: EdgeInsets.symmetric(vertical: 8.0),
-                                          width: 200,
-                                          decoration: BoxDecoration(
-                                              color: Color(0Xffff5722),
-                                              borderRadius: BorderRadius.circular(20)),
-                                          child: Center(
-                                              child: Text(
-                                                "LOGIN",
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 18.0,
-                                                    fontFamily: 'Poppins1',
-                                                    fontWeight: FontWeight.bold),
-                                              )),
-                                        ),
-                                      ),
+                                    child: Text(
+                                      "Don't have an account? Sign up",
+                                      style: AppWidget.semiBoldTextFeildStyle(),
                                     ),
-
+                                  )
                                 ],
                               ),
                             ),
@@ -200,18 +205,6 @@ class _LoginState extends State<Login> {
                         ),
                       ),
                     ),
-                    SizedBox(
-                      height: 70.0,
-                    ),
-                    GestureDetector(
-                        onTap: () {
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (context) => SignUp()));
-                        },
-                        child: Text(
-                          "Don't have an account? Sign up",
-                          style: AppWidget.semiBoldTextFeildStyle(),
-                        ))
                   ],
                 ),
               )

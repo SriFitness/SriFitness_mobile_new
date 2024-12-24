@@ -1,52 +1,54 @@
-// lib/pages/form/medical_inquiry_1.dart
-
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:srifitness_app/pages/form/medical_inquiry_2.dart';
-import 'package:srifitness_app/pages/form/personal_details.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:srifitness_app/pages/form/medical_inquiry_1.dart';
+import 'package:srifitness_app/pages/form/medical_inquiry_3.dart';
 import 'package:srifitness_app/widget/colo_extension.dart';
 import 'package:srifitness_app/widget/custom_appbar.dart';
 
-class MedicalInquiry1 extends StatefulWidget {
+class MedicalInquiry2 extends StatefulWidget {
   final Function(Map<String, dynamic>) onSave;
 
-  const MedicalInquiry1({super.key, required this.onSave});
+  const MedicalInquiry2({super.key, required this.onSave});
 
   @override
-  State<MedicalInquiry1> createState() => _MedicalInquiry1State();
+  State<MedicalInquiry2> createState() => _MedicalInquiry2State();
 }
 
-class _MedicalInquiry1State extends State<MedicalInquiry1> {
+class _MedicalInquiry2State extends State<MedicalInquiry2> {
   final _formKey = GlobalKey<FormState>();
-  String? _selectedHeartProblem;
-  String? _selectedCirculatoryProblem;
-  String? _selectedBloodPressureProblem;
-  String? _selectedJointMovementProblem;
-  String? _selectedFeelDizzy;
-  String? _selectedPregnancy;
+  String? _selectedBackPain;
+  String? _selectedAsthma;
+  String? _selectedDiabetes;
+  String? _selectedFinishedMedication;
+  String? _selectedPrescribedMedtication;
+  String? _selectedMigraine;
+  String? _selectedSurgery;
   String? _fileName;
 
   void _saveForm() {
     if (_formKey.currentState?.validate() ?? false) {
       // Collect form data
-      Map<String, dynamic> medicalInquiry1Data = {
-        'heartProblem': _selectedHeartProblem,
-        'circulatoryProblem': _selectedCirculatoryProblem,
-        'bloodPressureProblem': _selectedBloodPressureProblem,
-        'jointMovementProblem': _selectedJointMovementProblem,
-        'feelDizzy': _selectedFeelDizzy,
-        'pregnancy': _selectedPregnancy,
+      Map<String, dynamic> medicalInquiry2Data = {
+        'backPain': _selectedBackPain,
+        'asthma': _selectedAsthma,
+        'diabetes': _selectedDiabetes,
+        'finishedMedication': _selectedFinishedMedication,
+        'prescribedMedication': _selectedPrescribedMedtication,
+        'migraine': _selectedMigraine,
+        'surgery': _selectedSurgery,
         'fileName': _fileName,
       };
 
       // Pass data to parent widget
-      widget.onSave(medicalInquiry1Data);
+      widget.onSave(medicalInquiry2Data);
 
       // Navigate to the next form
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => MedicalInquiry2(onSave: widget.onSave)),
+        MaterialPageRoute(builder: (context) => MedicalInquiry3(onSave: widget.onSave)),
       );
     }
   }
@@ -54,26 +56,17 @@ class _MedicalInquiry1State extends State<MedicalInquiry1> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: 'SRI FITNESS'),
+      appBar: const CustomAppBar(title: 'SRI FITNESS'),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Medical Inquiry',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: TColor.defaultwhitecolor,
-                  ),
-                ),
-                SizedBox(height: 20),
-                Text(
-                  'Do you currently or have ever suffered from any of the following conditions?',
+                  'Do you currently receive medical care or any of the following affect you?',
                   style: TextStyle(
                     fontSize: 14,
                     color: TColor.textcolor,
@@ -81,81 +74,59 @@ class _MedicalInquiry1State extends State<MedicalInquiry1> {
                 ),
                 SizedBox(height: 20),
                 buildDropdown(
-                  label: '01 Heart problems?',
-                  value: _selectedHeartProblem,
+                  label: '07 Back/spinal pain?',
+                  value: _selectedBackPain,
                   onChanged: (value) => setState(() {
-                    _selectedHeartProblem = value;
+                    _selectedBackPain = value;
+                  }),
+                ),
+                const SizedBox(height: 20),
+                buildDropdown(
+                  label: '08 Headache or migraine?',
+                  value: _selectedMigraine,
+                  onChanged: (value) => setState(() {
+                    _selectedMigraine = value;
+                  }),
+                ),
+                const SizedBox(height: 20),
+                buildDropdown(
+                  label: '09 Do you have surgery recently?',
+                  value: _selectedSurgery,
+                  onChanged: (value) => setState(() {
+                    _selectedSurgery = value;
+                  }),
+                ),
+                const SizedBox(height: 20),
+                buildDropdown(
+                  label: 'Currently been prescribed medications?',
+                  value: _selectedPrescribedMedtication,
+                  onChanged: (value) => setState(() {
+                    _selectedPrescribedMedtication = value;
                   }),
                 ),
                 SizedBox(height: 20),
                 buildDropdown(
-                  label: '02 Circulatory problems?',
-                  value: _selectedCirculatoryProblem,
+                  label: 'Recently finished a course of medication?',
+                  value: _selectedFinishedMedication,
                   onChanged: (value) => setState(() {
-                    _selectedCirculatoryProblem = value;
+                    _selectedFinishedMedication = value;
                   }),
                 ),
                 SizedBox(height: 20),
                 buildDropdown(
-                  label: '03 Blood pressure problems?',
-                  value: _selectedBloodPressureProblem,
+                  label: 'Diabetes?',
+                  value: _selectedDiabetes,
                   onChanged: (value) => setState(() {
-                    _selectedBloodPressureProblem = value;
+                    _selectedDiabetes = value;
                   }),
                 ),
                 SizedBox(height: 20),
                 buildDropdown(
-                  label: '04 Joint, movement problems?',
-                  value: _selectedJointMovementProblem,
+                  label: 'Asthma or breathing problems?',
+                  value: _selectedAsthma,
                   onChanged: (value) => setState(() {
-                    _selectedJointMovementProblem = value;
+                    _selectedAsthma = value;
                   }),
-                ),
-                SizedBox(height: 20),
-                buildDropdown(
-                  label: '05 Feel dizzy or imbalance during exercise?',
-                  value: _selectedFeelDizzy,
-                  onChanged: (value) => setState(() {
-                    _selectedFeelDizzy = value;
-                  }),
-                ),
-                SizedBox(height: 20),
-                buildDropdown(
-                  label: '06 Currently pregnant or recently given birth?',
-                  value: _selectedPregnancy,
-                  onChanged: (value) => setState(() {
-                    _selectedPregnancy = value;
-                  }),
-                ),
-                SizedBox(height: 20),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'If Yes, please provide details ',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
-                      color: TColor.textcolor,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 5),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: ElevatedButton(
-                    onPressed: _pickFile,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: TColor.defaultblackcolor,
-                    ),
-                    child: Text(
-                      _fileName ?? 'Upload Image or PDF',
-                      style: TextStyle(
-                        color: TColor.textcolor,
-                        fontWeight: FontWeight.w400,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
                 ),
                 SizedBox(height: 40),
                 Row(
@@ -166,7 +137,7 @@ class _MedicalInquiry1State extends State<MedicalInquiry1> {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                              builder: (context) =>PersonalDetails(onSave: widget.onSave,)),
+                              builder: (context) => MedicalInquiry1(onSave: widget.onSave,)),
                         );
                       },
                       style: ElevatedButton.styleFrom(

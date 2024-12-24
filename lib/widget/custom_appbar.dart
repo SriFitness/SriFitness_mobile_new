@@ -36,7 +36,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           leading: Padding(
             padding: EdgeInsets.only(left: 15),
             child: Image.asset(
-              'assets/img/logo_Sri.png',
+              'images/logo_Sri.png',
               width: 300,
               height: 100,
             ),

@@ -4,6 +4,7 @@ class SharedPreferenceHelper {
   static String userIdKey = "USERKEY";
   static String userNameKey = "USERNAMEKEY";
   static String userEmailKey = "USEREMAILKEY";
+  static String userPasswordKey = "USERPASSWORDKEY";
   static String userWalletKey = "USERWALLETKEY";
   static String userProfileKey = "USERPROFILEKEY";
 
@@ -20,6 +21,11 @@ class SharedPreferenceHelper {
   Future<bool> saveUserEmail(String getUserEmail) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.setString(userEmailKey, getUserEmail);
+  }
+
+  Future<bool> saveUserPassword(String getUserPassword) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.setString(userPasswordKey, getUserPassword);
   }
 
   Future<bool> saveUserWallet(String getUserWallet) async {
@@ -47,12 +53,28 @@ class SharedPreferenceHelper {
     return prefs.getString(userEmailKey);
   }
 
+  Future<String?> getUserPassword() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString(userPasswordKey);
+  }
+
   Future<String?> getUserWallet() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString(userWalletKey);
   }
+
   Future<String?> getUserProfile() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString(userProfileKey);
+  }
+
+  Future<void> clearUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove(userIdKey);
+    await prefs.remove(userNameKey);
+    await prefs.remove(userEmailKey);
+    await prefs.remove(userPasswordKey);
+    await prefs.remove(userWalletKey);
+    await prefs.remove(userProfileKey);
   }
 }

@@ -67,4 +67,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'srifitness-96c1b.firebasestorage.app',
     iosBundleId: 'com.example.srifitnessApp',
   );
+
 }

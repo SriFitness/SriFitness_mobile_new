@@ -1,8 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:srifitness_app/pages/login.dart';
-import 'package:srifitness_app/pages/signup.dart';
-
 
 class ResetPassword extends StatefulWidget {
   const ResetPassword({super.key});
@@ -12,28 +11,48 @@ class ResetPassword extends StatefulWidget {
 }
 
 class _ResetPasswordState extends State<ResetPassword> {
-  TextEditingController mailcontroller = new TextEditingController();
-
+  TextEditingController mailcontroller = TextEditingController();
   String email = "";
-
   final _formkey = GlobalKey<FormState>();
 
   resetPassword() async {
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-            "Password Reset Email has been sent !",
-            style: TextStyle(fontSize: 18.0),
-          )));
-    } on FirebaseAuthException catch (e) {
-      if (e.code == "user-not-found") {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(
-              "No user found for that email.",
-              style: TextStyle(fontSize: 18.0),
-            )));
+        content: Text(
+          "Password Reset Email has been sent!",
+          style: TextStyle(fontSize: 18.0),
+        ),
+      ));
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection('user-details')
+            .doc(user.uid)
+            .collection('login-info')
+            .doc('id')
+            .update({'isPasswordReset': true});
       }
+      // Delay to allow snackbar message to be read
+      Future.delayed(Duration(seconds: 2), () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Login()),
+        );
+      });
+    } on FirebaseAuthException catch (e) {
+      String errorMessage = "An error occurred";
+      if (e.code == "user-not-found") {
+        errorMessage = "No user found for that email.";
+      } else if (e.code == "network-request-failed") {
+        errorMessage = "Network error. Please try again later.";
+      }
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(
+          errorMessage,
+          style: TextStyle(fontSize: 18.0),
+        ),
+      ));
     }
   }
 
@@ -41,138 +60,87 @@ class _ResetPasswordState extends State<ResetPassword> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Container(
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: Column(
           children: [
-            SizedBox(
-              height: 70.0,
-            ),
+            SizedBox(height: 70.0),
             Container(
               alignment: Alignment.topCenter,
               child: Text(
                 "Password Recovery",
                 style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 30.0,
-                    fontWeight: FontWeight.bold),
+                  color: Colors.white,
+                  fontSize: 30.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-            SizedBox(
-              height: 10.0,
-            ),
+            SizedBox(height: 10.0),
             Text(
               "Enter your mail",
               style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.bold),
+                color: Colors.white,
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             Expanded(
-                child: Form(
-                    key: _formkey,
-                    child: Padding(
-                      padding: EdgeInsets.only(left: 10.0),
-                      child: ListView(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.only(left: 10.0),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.white70, width: 2.0),
-                              borderRadius: BorderRadius.circular(30),
+              child: Form(
+                key: _formkey,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 10.0),
+                  child: ListView(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.only(left: 10.0),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.white70, width: 2.0),
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: TextFormField(
+                          controller: mailcontroller,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please Enter Email';
+                            }
+                            return null;
+                          },
+                          style: TextStyle(color: Colors.white),
+                          decoration: InputDecoration(
+                            hintText: "Email",
+                            hintStyle: TextStyle(fontSize: 18.0, color: Colors.white),
+                            prefixIcon: Icon(
+                              Icons.person,
+                              color: Colors.white70,
+                              size: 20.0,
                             ),
-                            child: TextFormField(
-                              controller: mailcontroller,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please Enter Email';
-                                }
-                                return null;
-                              },
-                              style: TextStyle(color: Colors.white),
-                              decoration: InputDecoration(
-                                  hintText: "Email",
-                                  hintStyle:
-                                  TextStyle(fontSize: 18.0, color: Colors.white),
-                                  prefixIcon: Icon(
-                                    Icons.person,
-                                    color: Colors.white70,
-                                    size: 30.0,
-                                  ),
-                                  border: InputBorder.none),
-                            ),
+                            border: InputBorder.none,
                           ),
-                          SizedBox(
-                            height: 40.0,
-                          ),
-                          GestureDetector(
-                            onTap: (){
-                              // Check if the form is valid using the form key validator
-                              if(_formkey.currentState!.validate()){
-                                // Update the state with the current email value from the controller
-                                setState(() {
-                                  email = mailcontroller.text;
-                                });
-
-                                // Call the function to reset the password
-                                resetPassword();
-
-                                // Navigate to the Login page after the password reset
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => Login())
-                                ); // Added the missing semicolon here
-                              }
-                            },
-                            child: Container(
-                              width: 140,
-                              padding: EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(10)),
-                              child: Center(
-                                child: Text(
-                                  "Send Email",
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 18.0,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 50.0,
-                          ),
-                          // Row(
-                          //   mainAxisAlignment: MainAxisAlignment.center,
-                          //   children: [
-                          //     Text(
-                          //       "Don't have an account?",
-                          //       style: TextStyle(fontSize: 18.0, color: Colors.white),
-                          //     ),
-                          //     SizedBox(
-                          //       width: 5.0,
-                          //     ),
-                          //     GestureDetector(
-                          //       onTap: () {
-                          //         Navigator.push(
-                          //             context,
-                          //             MaterialPageRoute(
-                          //                 builder: (context) => SignUp()));
-                          //       },
-                          //       child: Text(
-                          //         "Create",
-                          //         style: TextStyle(
-                          //             color: Color.fromARGB(225, 184, 166, 6),
-                          //             fontSize: 20.0,
-                          //             fontWeight: FontWeight.w500),
-                          //       ),
-                          //     )
-                          //   ],
-                          // )
-                        ],
+                          onChanged: (value) {
+                            email = value;
+                          },
+                        ),
                       ),
-                    ))),
+                      SizedBox(height: 30.0),
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            if (_formkey.currentState!.validate()) {
+                              resetPassword();
+                            }
+                          },
+                          child: Text(
+                            "Reset Password",
+                            style: TextStyle(fontSize: 20),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),

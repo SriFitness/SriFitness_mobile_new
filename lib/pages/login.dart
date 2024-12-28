@@ -1,10 +1,11 @@
+// lib/pages/login.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:srifitness_app/pages/bottomnav.dart';
 import 'package:srifitness_app/pages/forgotpassword.dart';
 import 'package:srifitness_app/pages/form/personal_details.dart';
 import 'package:srifitness_app/pages/signup.dart';
-import 'package:srifitness_app/service/shared_pref.dart';
 import 'package:srifitness_app/widget/widget_support.dart';
 
 class Login extends StatefulWidget {
@@ -17,28 +18,38 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   String email = "", password = "";
 
-  final _formkey= GlobalKey<FormState>();
+  final _formkey = GlobalKey<FormState>();
 
-  TextEditingController useremailcontroller = new TextEditingController();
-  TextEditingController userpasswordcontroller = new TextEditingController();
+  TextEditingController useremailcontroller = TextEditingController();
+  TextEditingController userpasswordcontroller = TextEditingController();
 
   userLogin() async {
     try {
-      await FirebaseAuth.instance
+      // Signing in with Firebase Authentication
+      UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
 
-      // Save email and password to local storage
-      await SharedPreferenceHelper().saveUserEmail(email);
-      await SharedPreferenceHelper().saveUserPassword(password);
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => PersonalDetails(onSave: (data) {
-            // Handle the saved data here
-          }),
-        ),
-      );
+      // Check if it's the user's first login or if they need to reset password and fill out forms
+      if (userCredential.user != null) {
+        bool isFirstLogin = await checkFirstLogin(userCredential.user!);
+        if (isFirstLogin) {
+          // Navigate to PersonalDetails page for form completion
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PersonalDetails(onSave: (data) {
+                // Handle the saved data here
+              }),
+            ),
+          );
+        } else {
+          // Normal flow after login
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => BottomNav()), // or your home page
+          );
+        }
+      }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -46,13 +57,25 @@ class _LoginState extends State<Login> {
               "No User Found for that Email",
               style: TextStyle(fontSize: 18.0, color: Colors.black),
             )));
-      }else if(e.code=='wrong-password'){
+      } else if (e.code == 'wrong-password') {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(
               "Wrong Password Provided by User",
               style: TextStyle(fontSize: 18.0, color: Colors.black),
             )));
       }
+    }
+  }
+
+  // Method to check if the user is logging in for the first time
+  Future<bool> checkFirstLogin(User user) async {
+    // Check if there's a flag or field to indicate first login in Firestore or Firebase
+    // For this example, let's assume there's a field "isFirstLogin" in Firestore
+    try {
+      var userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      return userDoc.exists && userDoc['isFirstLogin'] == true;
+    } catch (e) {
+      return false; // Return false if the field doesn't exist or any error happens
     }
   }
 
@@ -76,8 +99,7 @@ class _LoginState extends State<Login> {
                         ])),
               ),
               Container(
-                margin:
-                EdgeInsets.only(top: MediaQuery.of(context).size.height / 3),
+                margin: EdgeInsets.only(top: MediaQuery.of(context).size.height / 3),
                 height: MediaQuery.of(context).size.height / 1.5,
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
@@ -143,8 +165,8 @@ class _LoginState extends State<Login> {
                                     height: 30.0,
                                   ),
                                   TextFormField(
-                                    controller:userpasswordcontroller,
-                                    validator: (value){
+                                    controller: userpasswordcontroller,
+                                    validator: (value) {
                                       if (value == null || value.isEmpty) {
                                         return 'Please Enter Password';
                                       }
@@ -190,8 +212,10 @@ class _LoginState extends State<Login> {
                                   ),
                                   GestureDetector(
                                     onTap: () {
-                                      Navigator.push(context,
-                                          MaterialPageRoute(builder: (context) => SignUp()));
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => SignUp()));
                                     },
                                     child: Text(
                                       "Don't have an account? Sign up",

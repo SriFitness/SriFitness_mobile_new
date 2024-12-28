@@ -1,11 +1,9 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:srifitness_app/pages/home.dart';
-import 'package:srifitness_app/pages/marketplace.dart';
+import 'package:srifitness_app/pages/marketplace/marketplace.dart';
 import 'package:srifitness_app/pages/profile.dart';
 import 'package:srifitness_app/pages/workout.dart';
-
-
 
 class BottomNav extends StatefulWidget {
   const BottomNav({super.key});
@@ -20,17 +18,17 @@ class _BottomNavState extends State<BottomNav> {
   late List<Widget> pages;
   late Widget currentPage;
   late Home homepage;
-  late MarketPlace marketPlace;
+  late Marketplace marketplace;
   late WorkoutView workoutView;
   late Profile profile;
 
   @override
   void initState() {
     homepage = Home();
-    marketPlace = MarketPlace();
+    marketplace = Marketplace();
     workoutView = WorkoutView();
     profile = Profile();
-    pages = [homepage, marketPlace, workoutView, profile];
+    pages = [homepage, marketplace, workoutView, profile];
     super.initState();
   }
 

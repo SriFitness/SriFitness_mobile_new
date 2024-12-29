@@ -1,9 +1,8 @@
+// lib/main.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:provider/provider.dart';
-import 'package:srifitness_app/models/cart_model.dart';
 import 'package:srifitness_app/pages/bottomnav.dart';
 import 'package:srifitness_app/pages/form/personal_details.dart';
 import 'package:srifitness_app/pages/form/medical_inquiry_1.dart';
@@ -14,12 +13,7 @@ import 'package:srifitness_app/widget/colo_extension.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => Cart(),
-      child: const MyApp(),
-    ),
-  );
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {

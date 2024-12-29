@@ -1,4 +1,3 @@
-// lib/main.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -41,16 +40,23 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         fontFamily: "Poppins",
       ),
-      home: _checkFirstTimeLogin(),
+      home: const HomeScreen(),
     );
   }
+}
 
-  Widget _checkFirstTimeLogin() {
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         } else {
           if (snapshot.hasData && snapshot.data != null) {
             User user = snapshot.data!;
@@ -63,7 +69,9 @@ class MyApp extends StatelessWidget {
                   .get(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
                 } else {
                   if (snapshot.hasData && snapshot.data != null) {
                     var data = snapshot.data!.data() as Map<String, dynamic>?;

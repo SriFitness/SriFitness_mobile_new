@@ -8,6 +8,7 @@ import 'package:srifitness_app/pages/form/medical_inquiry_1.dart';
 import 'package:srifitness_app/pages/login.dart';
 import 'package:srifitness_app/pages/forgotpassword.dart';
 import 'package:srifitness_app/widget/colo_extension.dart';
+import 'package:srifitness_app/workout/workout_plan_section.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -137,5 +138,54 @@ class HomeScreen extends StatelessWidget {
         MaterialPageRoute(builder: (context) => const BottomNav()),
       );
     }
+  }
+}
+
+class BottomNav extends StatefulWidget {
+  const BottomNav({super.key});
+
+  @override
+  State<BottomNav> createState() => _BottomNavState();
+}
+
+class _BottomNavState extends State<BottomNav> {
+  int _selectedIndex = 0;
+
+  final List<Widget> _pages = [
+    const Scaffold(body: Center(child: Text('Home Coming Soon'))),
+    WorkoutPlansSection(),
+    const Scaffold(body: Center(child: Text('Profile Coming Soon'))),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _pages[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.fitness_center),
+            label: 'Workouts',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: TColor.maincolor,
+        onTap: _onItemTapped,
+      ),
+    );
   }
 }

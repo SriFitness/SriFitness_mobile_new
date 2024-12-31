@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:srifitness_app/pages/form/medical_inquiry_2.dart';
 import 'package:srifitness_app/widget/colo_extension.dart';
 import 'package:srifitness_app/widget/custom_appbar.dart';
+import 'package:srifitness_app/service/shared_pref.dart';
 
 class MedicalInquiry1 extends StatefulWidget {
   final Function(Map<String, dynamic>) onSave;
-
   const MedicalInquiry1({super.key, required this.onSave});
 
   @override
@@ -14,18 +14,59 @@ class MedicalInquiry1 extends StatefulWidget {
 
 class _MedicalInquiry1State extends State<MedicalInquiry1> {
   final _formKey = GlobalKey<FormState>();
+  final _prefs = SharedPreferenceHelper();
   String? _selectedHeartProblem;
+  bool _isSaving = false;
 
-  void _saveForm() {
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedData();
+  }
+
+  Future<void> _loadSavedData() async {
+    final savedData = await _prefs.getFormData(SharedPreferenceHelper.medicalInquiry1Key);
+    if (savedData != null) {
+      setState(() {
+        _selectedHeartProblem = savedData['heartProblem'];
+      });
+    }
+  }
+
+  void _saveForm() async {
+    if (_isSaving) return;
     if (_formKey.currentState?.validate() ?? false) {
-      Map<String, dynamic> medicalInquiry1Data = {
-        'heartProblem': _selectedHeartProblem,
-      };
-      widget.onSave(medicalInquiry1Data);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => MedicalInquiry2(onSave: widget.onSave, previousData: medicalInquiry1Data)),
-      );
+      setState(() => _isSaving = true);
+
+      try {
+        Map<String, dynamic> medicalInquiry1Data = {
+          'heartProblem': _selectedHeartProblem,
+          'timestamp': DateTime.now().toIso8601String(),
+        };
+
+        // Save to shared preferences
+        await _prefs.saveFormData(
+          SharedPreferenceHelper.medicalInquiry1Key,
+          medicalInquiry1Data
+        );
+
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MedicalInquiry2(
+              onSave: widget.onSave,
+              previousData: medicalInquiry1Data,
+            ),
+          ),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving data: $e')),
+        );
+      } finally {
+        if (mounted) setState(() => _isSaving = false);
+      }
     }
   }
 
@@ -62,18 +103,20 @@ class _MedicalInquiry1State extends State<MedicalInquiry1> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     ElevatedButton(
-                      onPressed: _saveForm,
+                      onPressed: _isSaving ? null : _saveForm,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: TColor.maincolor,
                       ),
-                      child: Text(
-                        'Next',
-                        style: TextStyle(
-                          color: TColor.textcolor,
-                          fontWeight: FontWeight.w400,
-                          fontSize: 16,
-                        ),
-                      ),
+                      child: _isSaving
+                          ? CircularProgressIndicator()
+                          : Text(
+                              'Next',
+                              style: TextStyle(
+                                color: TColor.textcolor,
+                                fontWeight: FontWeight.w400,
+                                fontSize: 16,
+                              ),
+                            ),
                     ),
                   ],
                 ),

@@ -1,3 +1,5 @@
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:srifitness_app/pages/form/medical_inquiry_2.dart';
 import 'package:srifitness_app/widget/colo_extension.dart';
@@ -14,8 +16,14 @@ class MedicalInquiry1 extends StatefulWidget {
 
 class _MedicalInquiry1State extends State<MedicalInquiry1> {
   final _formKey = GlobalKey<FormState>();
-  final _prefs = SharedPreferenceHelper();
   String? _selectedHeartProblem;
+  String? _selectedCirculatoryProblem;
+  String? _selectedBloodPressureProblem;
+  String? _selectedJointMovementProblem;
+  String? _selectedFeelDizzy;
+  String? _selectedPregnancy;
+  String? _fileName;
+  final _prefs = SharedPreferenceHelper();
   bool _isSaving = false;
 
   @override
@@ -42,6 +50,12 @@ class _MedicalInquiry1State extends State<MedicalInquiry1> {
         Map<String, dynamic> medicalInquiry1Data = {
           'heartProblem': _selectedHeartProblem,
           'timestamp': DateTime.now().toIso8601String(),
+          'circulatoryProblem': _selectedCirculatoryProblem,
+          'bloodPressureProblem': _selectedBloodPressureProblem,
+          'jointMovementProblem': _selectedJointMovementProblem,
+          'feelDizzy': _selectedFeelDizzy,
+          'pregnancy': _selectedPregnancy,
+          'fileName': _fileName,
         };
 
         // Save to shared preferences
@@ -90,22 +104,126 @@ class _MedicalInquiry1State extends State<MedicalInquiry1> {
                     color: TColor.defaultwhitecolor,
                   ),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 22),
+                Text(
+                  'Do you currently or have ever suffered from any of the following conditions?',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: TColor.textcolor,
+                  ),
+                ),
+                SizedBox(height: 25),
                 buildDropdown(
-                  label: '01 Heart problems?',
+                  label: 'Heart problems?',
                   value: _selectedHeartProblem,
                   onChanged: (value) => setState(() {
                     _selectedHeartProblem = value;
                   }),
                 ),
+                SizedBox(height: 24),
+                buildDropdown(
+                  label: 'Circulatory problems?',
+                  value: _selectedCirculatoryProblem,
+                  onChanged: (value) => setState(() {
+                    _selectedCirculatoryProblem = value;
+                  }),
+                ),
+                SizedBox(height: 24),
+                buildDropdown(
+                  label: 'Blood pressure problems?',
+                  value: _selectedBloodPressureProblem,
+                  onChanged: (value) => setState(() {
+                    _selectedBloodPressureProblem = value;
+                  }),
+                ),
+                SizedBox(height: 24),
+                buildDropdown(
+                  label: 'Joint, movement problems?',
+                  value: _selectedJointMovementProblem,
+                  onChanged: (value) => setState(() {
+                    _selectedJointMovementProblem = value;
+                  }),
+                ),
+                SizedBox(height: 24),
+                buildDropdown(
+                  label: 'Feel dizzy or imbalance during exercise?',
+                  value: _selectedFeelDizzy,
+                  onChanged: (value) => setState(() {
+                    _selectedFeelDizzy = value;
+                  }),
+                ),
+                SizedBox(height: 24),
+                buildDropdown(
+                  label: 'Currently pregnant or recently given birth?',
+                  value: _selectedPregnancy,
+                  onChanged: (value) => setState(() {
+                    _selectedPregnancy = value;
+                  }),
+                ),
+                SizedBox(height: 24),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'If Yes, please provide details ',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w400,
+                      color: TColor.textcolor,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: ElevatedButton(
+                    onPressed: _pickFile,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: TColor.defaultblackcolor,
+                    ),
+                    child: Text(
+                      _fileName ?? 'Upload Image or PDF',
+                      style: TextStyle(
+                        color: TColor.textcolor,
+                        fontWeight: FontWeight.w400,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
                 SizedBox(height: 40),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    Row(
+                      children: [
+//TODO: PREVIOUS BUTTON
+                        ElevatedButton(
+                        // onPressed: _isSaving ? null : _saveForm,
+                          onPressed: () {
+                            //TODO: THIS FUNCTION WILL BE CALLED WHEN THE BUTTON IS PRESSED
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: TColor.maincolor,
+                          padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                        ),
+                        child: _isSaving
+                            ? CircularProgressIndicator()
+                            : Text(
+                          'Previous',
+                          style: TextStyle(
+                            color: TColor.textcolor,
+                            fontWeight: FontWeight.w400,
+                            fontSize:18,
+                          ),
+                        ),
+                        ),
+                      ],
+                    ),
                     ElevatedButton(
                       onPressed: _isSaving ? null : _saveForm,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: TColor.maincolor,
+                        padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
                       ),
                       child: _isSaving
                           ? CircularProgressIndicator()
@@ -114,7 +232,7 @@ class _MedicalInquiry1State extends State<MedicalInquiry1> {
                               style: TextStyle(
                                 color: TColor.textcolor,
                                 fontWeight: FontWeight.w400,
-                                fontSize: 16,
+                                fontSize:18,
                               ),
                             ),
                     ),
@@ -128,6 +246,24 @@ class _MedicalInquiry1State extends State<MedicalInquiry1> {
     );
   }
 
+
+  Future<void> _pickFile() async {
+    if (kIsWeb) {
+      print('File picking is not supported on the web.');
+      return;
+    }
+
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      setState(() {
+        _fileName = result.files.single.name;
+      });
+    }
+  }
   Widget buildDropdown({
     required String label,
     required String? value,

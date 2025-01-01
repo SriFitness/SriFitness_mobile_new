@@ -72,7 +72,8 @@ class _LoginState extends State<Login> {
           // User completed everything - go straight to main app
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const BottomNav()),
+             MaterialPageRoute(builder: (context) => const BottomNav()),
+
           );
           return;
         }
@@ -134,6 +135,8 @@ class _LoginState extends State<Login> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const BottomNav()),
+
+
           );
 
       }
@@ -234,3 +237,4 @@ class _LoginState extends State<Login> {
     );
   }
 }
+

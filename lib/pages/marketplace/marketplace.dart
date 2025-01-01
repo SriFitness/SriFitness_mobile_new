@@ -1,13 +1,11 @@
-// lib/pages/marketplace/marketplace.dart
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:srifitness_app/pages/marketplace/product_model.dart';
 import 'package:srifitness_app/pages/marketplace/product_card.dart';
-import 'package:srifitness_app/pages/marketplace/cart.dart';
-import 'package:srifitness_app/components/banner_s_style_1.dart';
-import 'package:srifitness_app/components/banner_s_style_5.dart';
 import 'package:srifitness_app/constants.dart';
 import 'package:srifitness_app/pages/marketplace/cart_screen.dart';
+import 'package:srifitness_app/widget/custom_appbar.dart';
 
 class Marketplace extends StatefulWidget {
   @override
@@ -48,14 +46,16 @@ class _MarketplaceState extends State<Marketplace> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Marketplace'),
-        backgroundColor: primaryColor,
+      appBar: CustomAppBar(
+        title: 'Marketplace',
+        height: 60,
         actions: [
           IconButton(
             icon: Icon(Icons.shopping_cart),
+            iconSize: 30,
             onPressed: () {
               Navigator.push(
                 context,
@@ -65,82 +65,90 @@ class _MarketplaceState extends State<Marketplace> {
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          _fetchProducts(); // Call the function without using its return value
-        },
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.all(defaultPadding),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search products...',
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+      body: SingleChildScrollView(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            _fetchProducts(); // Call the function without using its return value
+          },
+          child: SingleChildScrollView(
+            child: CustomScrollView(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.all(defaultPadding),
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Search products...',
+                        hintStyle: TextStyle(color: Colors.black),
+                        prefixIcon: Icon(Icons.search, color: Colors.black,),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[100],
+                      ),
+                      style: TextStyle(color: Colors.black),
+                      onChanged: _filterProducts,
                     ),
-                    filled: true,
-                    fillColor: Colors.grey[100],
                   ),
-                  onChanged: _filterProducts,
                 ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Column(
-                children: [
-                  BannerSStyle1(
-                    title: "Summer Sale",
-                    subtitle: "Get fit for summer",
-                    discountParcent: 30,
-                    press: () {
-                      // Navigate to summer sale page
-                    },
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      // BannerSStyle1(
+                      //   title: "Summer Sale",
+                      //   subtitle: "Get fit for summer",
+                      //   discountParcent: 30,
+                      //   press: () {
+                      //     // Navigate to summer sale page
+                      //   },
+                      // ),
+                      SizedBox(height: defaultPadding),
+                      // BannerSStyle5(
+                      //   title: "New Arrivals",
+                      //   subtitle: "Check out the latest gear",
+                      //   discountPercent: 20,
+                      //   bottomText: "Collection".toUpperCase(),
+                      //   press: () {
+                      //     // Navigate to new arrivals page
+                      //   },
+                      // ),
+                    ],
                   ),
-                  SizedBox(height: defaultPadding),
-                  BannerSStyle5(
-                    title: "New Arrivals",
-                    subtitle: "Check out the latest gear",
-                    discountPercent: 20,
-                    bottomText: "Collection".toUpperCase(),
-                    press: () {
-                      // Navigate to new arrivals page
-                    },
-                  ),
-                ],
-              ),
-            ),
-            SliverPadding(
-              padding: EdgeInsets.all(8),
-              sliver: SliverGrid(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.7,
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 8,
                 ),
-                delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                    return ProductCard(
-                      product: _filteredProducts[index],
-                      onAddToCart: () {
-                        // Implement add to cart functionality
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('${_filteredProducts[index].name} added to cart'),
-                          ),
+                SliverPadding(
+                  padding: EdgeInsets.all(defaultPadding),
+                  sliver: SliverGrid(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 1,
+                        childAspectRatio: 1.1, // Adjusted aspect ratio for increased height
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 8
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                        return ProductCard(
+                          product: _filteredProducts[index],
+                          onAddToCart: () {
+                            // Implement add to cart functionality
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('${_filteredProducts[index].name} added to cart'),
+                              ),
+                            );
+                          },
                         );
                       },
-                    );
-                  },
-                  childCount: _filteredProducts.length,
+                      childCount: _filteredProducts.length,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

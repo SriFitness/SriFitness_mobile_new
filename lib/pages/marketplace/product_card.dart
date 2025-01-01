@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:srifitness_app/constants.dart';
+import 'package:srifitness_app/models/cart_model.dart';
 import 'package:srifitness_app/pages/marketplace/product_model.dart';
 import 'package:srifitness_app/pages/marketplace/product_detail_screen.dart';
 
@@ -7,11 +9,7 @@ class ProductCard extends StatelessWidget {
   final Product product;
   final VoidCallback? onAddToCart;
 
-  const ProductCard({
-    Key? key,
-    required this.product,
-    this.onAddToCart,
-  }) : super(key: key);
+  const ProductCard({required this.product, required this.onAddToCart});
 
   @override
   Widget build(BuildContext context) {
@@ -31,25 +29,21 @@ class ProductCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                  child: Image.network(
-                    product.thumbnail,
+            ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              child: Image.network(
+                product.thumbnail,
+                height: 200, // Adjusted height to prevent overflow
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
                     height: 200,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        height: 200,
-                        color: Colors.grey[200],
-                        child: Icon(Icons.image_not_supported, size: 50),
-                      );
-                    },
-                  ),
-                ),
-              ],
+                    color: Colors.grey[200],
+                    child: Icon(Icons.image_not_supported, size: 50),
+                  );
+                },
+              ),
             ),
             Padding(
               padding: EdgeInsets.all(12),
@@ -62,7 +56,7 @@ class ProductCard extends StatelessWidget {
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 4),
@@ -100,8 +94,12 @@ class ProductCard extends StatelessWidget {
                       ),
                       IconButton(
                         icon: Icon(Icons.add_shopping_cart),
-                        onPressed: onAddToCart,
-                        color: secondaryColor,
+                        onPressed: () {
+                          Provider.of<Cart>(context, listen: false).addProduct(product);
+                          if (onAddToCart != null) {
+                            onAddToCart!();
+                          }
+                        },
                       ),
                     ],
                   ),

@@ -145,6 +145,7 @@ class HomeScreen extends StatelessWidget {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const BottomNav()),
+
       );
     }
   }

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:srifitness_app/pages/home.dart';
 import 'package:srifitness_app/pages/marketplace/marketplace.dart';
 import 'package:srifitness_app/pages/profile.dart';
-import 'package:srifitness_app/pages/workout.dart';
+import 'package:srifitness_app/workout/workout_view.dart';
 
 class BottomNav extends StatefulWidget {
   const BottomNav({super.key});

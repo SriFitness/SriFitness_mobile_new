@@ -5,11 +5,13 @@ import 'package:srifitness_app/widget/colo_extension.dart';
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final double height;
+  final List<Widget>? actions;
 
   const CustomAppBar({
     Key? key,
     required this.title,
     this.height = kToolbarHeight,
+    this.actions,
   }) : super(key: key);
 
   @override
@@ -43,6 +45,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           backgroundColor: TColor.backgroundcolor,
           elevation: 0,
+          actions: actions,
         ),
       ),
     );

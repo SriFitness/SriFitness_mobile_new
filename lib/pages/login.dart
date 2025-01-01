@@ -66,6 +66,16 @@ class _LoginState extends State<Login> {
         Map<String, dynamic> data = loginInfo.data() as Map<String, dynamic>;
 
         if (!mounted) return;
+
+        // Handle all combinations:
+        if (data['isPasswordReset'] == true && data['isFormSubmitted'] == true) {
+          // User completed everything - go straight to main app
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const BottomNav()),
+          );
+          return;
+        }
         
         if (!data['isPasswordReset']) {
           Navigator.pushReplacement(
@@ -121,10 +131,11 @@ class _LoginState extends State<Login> {
           return;
         }
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const BottomNav()),
-        );
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const BottomNav()),
+          );
+
       }
     } on FirebaseAuthException catch (e) {
       String errorMessage = "An error occurred";

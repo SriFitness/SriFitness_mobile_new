@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+import 'package:srifitness_app/models/cart_model.dart';
 import 'package:srifitness_app/pages/bottomnav.dart';
 import 'package:srifitness_app/pages/form/personal_details.dart';
 import 'package:srifitness_app/pages/form/medical_inquiry_1.dart';
@@ -13,7 +15,14 @@ import 'package:srifitness_app/workout/workout_plan_section.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => Cart()),
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -138,54 +147,5 @@ class HomeScreen extends StatelessWidget {
         MaterialPageRoute(builder: (context) => const BottomNav()),
       );
     }
-  }
-}
-
-class BottomNav extends StatefulWidget {
-  const BottomNav({super.key});
-
-  @override
-  State<BottomNav> createState() => _BottomNavState();
-}
-
-class _BottomNavState extends State<BottomNav> {
-  int _selectedIndex = 0;
-
-  final List<Widget> _pages = [
-    const Scaffold(body: Center(child: Text('Home Coming Soon'))),
-    WorkoutPlansSection(),
-    const Scaffold(body: Center(child: Text('Profile Coming Soon'))),
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.fitness_center),
-            label: 'Workouts',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: TColor.maincolor,
-        onTap: _onItemTapped,
-      ),
-    );
   }
 }

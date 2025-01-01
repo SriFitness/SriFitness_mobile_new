@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'workout_card.dart';
+
 
 class WorkoutPlansScreen extends StatelessWidget {
   @override
@@ -37,18 +37,18 @@ class WorkoutList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      children: [
-        WorkoutCard(
-          title: '$difficulty Full Body',
-          time: '30 min',
-          exercises: '12 exercises',
-        ),
-        WorkoutCard(
-          title: '$difficulty Core',
-          time: '20 min',
-          exercises: '8 exercises',
-        ),
-      ],
+      // children: [
+      //   WorkoutCard(
+      //     title: '$difficulty Full Body',
+      //     time: '30 min',
+      //     exercises: '12 exercises',
+      //   ),
+      //   WorkoutCard(
+      //     title: '$difficulty Core',
+      //     time: '20 min',
+      //     exercises: '8 exercises',
+      //   ),
+      // ],
     );
   }
 }

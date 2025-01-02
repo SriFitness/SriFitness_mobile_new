@@ -54,11 +54,25 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     _loadSavedData();
   }
 
+  // Future<void> _loadSavedData() async {
+  //   final savedData = await _prefs.getFormData(SharedPreferenceHelper.personalDetailsKey);
+  //   if (savedData != null) {
+  //     setState(() {
+  //       _fullNameController.text = savedData['fullName'] ?? '';
+  //     });
+  //   }
+  // }
+
   Future<void> _loadSavedData() async {
     final savedData = await _prefs.getFormData(SharedPreferenceHelper.personalDetailsKey);
-    if (savedData != null) {
+    if (savedData != null && savedData['fullName'] != null && savedData['fullName'].toString().isNotEmpty) {
       setState(() {
         _fullNameController.text = savedData['fullName'] ?? '';
+      });
+    } else {
+      // Clear the text field for new users
+      setState(() {
+        _fullNameController.text = '';
       });
     }
   }

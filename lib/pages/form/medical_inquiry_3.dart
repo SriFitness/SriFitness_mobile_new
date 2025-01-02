@@ -7,6 +7,9 @@ import 'package:srifitness_app/widget/colo_extension.dart';
 import 'package:srifitness_app/widget/custom_appbar.dart';
 import 'package:srifitness_app/service/shared_pref.dart';
 
+//TODO : previous button function does not create.
+//TODO : file picking not working
+
 class MedicalInquiry3 extends StatefulWidget {
   final Function(Map<String, dynamic>) onSave;
   final Map<String, dynamic> previousData;
@@ -25,8 +28,15 @@ class _MedicalInquiry3State extends State<MedicalInquiry3> {
   final _formKey = GlobalKey<FormState>();
   final _prefs = SharedPreferenceHelper();
   String? _fileName;
+
+  final TextStyle _textStyle = TextStyle(
+    fontSize: 16,
+    color: TColor.textcolor,
+  );
+
   bool _isSaving = false;
 
+  //TODO : file picking not working
   Future<void> _pickFile() async {
     try {
       final result = await FilePicker.platform.pickFiles(
@@ -45,6 +55,24 @@ class _MedicalInquiry3State extends State<MedicalInquiry3> {
       );
     }
   }
+
+  // Future<void> _pickFile() async {
+  //   if (kIsWeb) {
+  //     print('File picking is not supported on the web.');
+  //     return;
+  //   }
+  //
+  //   final result = await FilePicker.platform.pickFiles(
+  //     type: FileType.custom,
+  //     allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
+  //   );
+  //
+  //   if (result != null && result.files.isNotEmpty) {
+  //     setState(() {
+  //       _fileName = result.files.single.name;
+  //     });
+  //   }
+  // }
 
   void _saveForm() async {
     if (_isSaving) return;
@@ -108,37 +136,108 @@ class _MedicalInquiry3State extends State<MedicalInquiry3> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  'Medical Inquiry',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: TColor.defaultwhitecolor,
+                SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'If Yes, please provide details',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      color: TColor.textcolor,
+                    ),
                   ),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 5),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: ElevatedButton(
+                    onPressed: _pickFile,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: TColor.defaultblackcolor,
+                    ),
+                    child: Text(
+                      _fileName ?? 'Upload Image or PDF',
+                      style: TextStyle(
+                        color: TColor.textcolor,
+                        fontWeight: FontWeight.w400,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
                 Text(
-                  '03 Upload Medical Documents',
+                  'Any other cases that prevent you from regular activities',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     color: TColor.textcolor,
                   ),
                 ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _pickFile,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: TColor.maincolor,
+                const SizedBox(height: 10),
+                TextFormField(
+                  style: _textStyle,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'Type your details here...',
+                    contentPadding: EdgeInsets.all(10),
                   ),
+                  maxLines: 5,
+                  validator: (value) {
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.centerLeft,
                   child: Text(
-                    _fileName ?? 'Select File',
-                    style: TextStyle(color: TColor.textcolor),
+                    'If there are any other cases, please provide details',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      color: TColor.textcolor,
+                    ),
                   ),
                 ),
-                SizedBox(height: 40),
+                const SizedBox(height: 5),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: ElevatedButton(
+                    onPressed: _pickFile,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: TColor.defaultblackcolor,
+                    ),
+                    child: Text(
+                      _fileName ?? 'Upload Image or PDF',
+                      style: TextStyle(
+                        color: TColor.textcolor,
+                        fontWeight: FontWeight.w400,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 40),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    //TODO : previous button function does not create.
+                    ElevatedButton(
+                      onPressed: _isSaving ? null : _saveForm,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: TColor.maincolor,
+                      ),
+                      child: _isSaving
+                          ? CircularProgressIndicator()
+                          : Text(
+                        'Previous',
+                        style: TextStyle(
+                          color: TColor.textcolor,
+                          fontWeight: FontWeight.w400,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
                     ElevatedButton(
                       onPressed: _isSaving ? null : _saveForm,
                       style: ElevatedButton.styleFrom(

@@ -6,6 +6,8 @@ import 'package:srifitness_app/widget/colo_extension.dart';
 import 'package:srifitness_app/widget/custom_appbar.dart';
 import 'package:srifitness_app/service/shared_pref.dart';
 
+//TODO: PREVIOUS BUTTON
+
 class MedicalInquiry1 extends StatefulWidget {
   final Function(Map<String, dynamic>) onSave;
   const MedicalInquiry1({super.key, required this.onSave});
@@ -90,7 +92,7 @@ class _MedicalInquiry1State extends State<MedicalInquiry1> {
       appBar: CustomAppBar(title: 'SRI FITNESS'),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(17.0),
           child: Form(
             key: _formKey,
             child: Column(
@@ -204,7 +206,7 @@ class _MedicalInquiry1State extends State<MedicalInquiry1> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: TColor.maincolor,
-                          padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                          padding: EdgeInsets.symmetric(horizontal: 36, vertical: 10),
                         ),
                         child: _isSaving
                             ? CircularProgressIndicator()
@@ -223,7 +225,7 @@ class _MedicalInquiry1State extends State<MedicalInquiry1> {
                       onPressed: _isSaving ? null : _saveForm,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: TColor.maincolor,
-                        padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                        padding: EdgeInsets.symmetric(horizontal: 36, vertical: 10),
                       ),
                       child: _isSaving
                           ? CircularProgressIndicator()

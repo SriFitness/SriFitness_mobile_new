@@ -132,18 +132,18 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                 Text(
                   'Personal Details',
                   style: TextStyle(
-                    fontSize: 24,
+                    fontSize: 26,
                     fontWeight: FontWeight.w700,
                     color: TColor.defaultwhitecolor,
                   ),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 22),
                 TextFormField(
                   controller: _fullNameController,
-                  style: TextStyle(fontSize: 16, color: TColor.textcolor),
+                  style: _textStyle,
                   decoration: InputDecoration(
                     labelText: 'Full Name',
-                    errorStyle: TextStyle(color: Colors.red),
+                    errorStyle: TextStyle(color: _errorColor),
                   ),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: (value) {
@@ -153,7 +153,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                     return null;
                   },
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 22),
                 GestureDetector(
                   onTap: () => _selectDate(context),
                   child: AbsorbPointer(
@@ -179,7 +179,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                     ),
                   ),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 22),
                 DropdownButtonFormField<String>(
                   value: _selectedGender,
                   decoration: InputDecoration(
@@ -206,7 +206,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 22),
                 TextFormField(
                   controller: _addressController,
                   style: _textStyle,
@@ -222,7 +222,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 22),
                 TextFormField(
                   controller: _townController,
                   style: _textStyle,
@@ -238,7 +238,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 22),
                 TextFormField(
                   controller: _telHomeController,
                   style: _textStyle,
@@ -263,7 +263,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 22),
                 TextFormField(
                   controller: _telMobileController,
                   style: _textStyle,
@@ -288,7 +288,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                     return null;
                   },
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 22),
                 TextFormField(
                   controller: _emergencyContactController,
                   style: _textStyle,
@@ -313,15 +313,16 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                     return null;
                   },
                 ),
-                SizedBox(height: 35),
+                SizedBox(height: 40),
                 Padding(
-                  padding: const EdgeInsets.all(12.0),
+                  padding: const EdgeInsets.all(16.0),
                   child: Align(
                     alignment: Alignment.centerRight,
                     child: ElevatedButton(
                       onPressed: _isSaving ? null : _saveForm,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: TColor.maincolor,
+                        padding: EdgeInsets.symmetric(horizontal: 36.0, vertical: 11),
                       ),
                       child: _isSaving
                           ? CircularProgressIndicator()
@@ -330,7 +331,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                         style: TextStyle(
                             color: TColor.textcolor,
                             fontWeight: FontWeight.w400,
-                            fontSize: 16),
+                            fontSize: 18),
                       )
                     ),
                   ),

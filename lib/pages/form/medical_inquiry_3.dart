@@ -1,8 +1,10 @@
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:srifitness_app/pages/bottomnav.dart';
+import 'package:srifitness_app/pages/form/medical_inquiry_2.dart';
 import 'package:srifitness_app/widget/colo_extension.dart';
 import 'package:srifitness_app/widget/custom_appbar.dart';
 import 'package:srifitness_app/service/shared_pref.dart';
@@ -30,6 +32,16 @@ class _MedicalInquiry3State extends State<MedicalInquiry3> {
   String? _fileName1;
   String? _fileName2;
 
+
+  @override
+  //initialize the state of the file name from the previous data
+  void initState() {
+    super.initState();
+    _fileName1 = widget.previousData['fileName1'];
+    _fileName2 = widget.previousData['fileName2'];
+
+  }
+
   final TextStyle _textStyle = TextStyle(
     fontSize: 16,
     color: TColor.textcolor,
@@ -39,6 +51,7 @@ class _MedicalInquiry3State extends State<MedicalInquiry3> {
 
   //TODO : file picking not working
   // Create two separate file picker methods
+
   Future<void> _pickFile1() async {
     try {
       final result = await FilePicker.platform.pickFiles(
@@ -60,8 +73,15 @@ class _MedicalInquiry3State extends State<MedicalInquiry3> {
           return;
         }
 
+        // Upload file to Firebase Storage
+        final storageRef = FirebaseStorage.instance.ref().child('uploads/${file.name}');
+        final uploadTask = storageRef.putData(file.bytes!);
+
+        final snapshot = await uploadTask.whenComplete(() {});
+        final downloadUrl = await snapshot.ref.getDownloadURL();
+
         setState(() {
-          _fileName1 = file.name;
+          _fileName1 = downloadUrl;
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -95,8 +115,15 @@ class _MedicalInquiry3State extends State<MedicalInquiry3> {
           return;
         }
 
+        // Upload file to Firebase Storage
+        final storageRef = FirebaseStorage.instance.ref().child('uploads/${file.name}');
+        final uploadTask = storageRef.putData(file.bytes!);
+
+        final snapshot = await uploadTask.whenComplete(() {});
+        final downloadUrl = await snapshot.ref.getDownloadURL();
+
         setState(() {
-          _fileName2 = file.name;
+          _fileName2 = downloadUrl;
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -110,23 +137,26 @@ class _MedicalInquiry3State extends State<MedicalInquiry3> {
     }
   }
 
-  // Future<void> _pickFile() async {
-  //   if (kIsWeb) {
-  //     print('File picking is not supported on the web.');
-  //     return;
-  //   }
-  //
-  //   final result = await FilePicker.platform.pickFiles(
-  //     type: FileType.custom,
-  //     allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
-  //   );
-  //
-  //   if (result != null && result.files.isNotEmpty) {
-  //     setState(() {
-  //       _fileName = result.files.single.name;
-  //     });
-  //   }
-  // }
+  void _navigateToPrevious() {
+    Map<String, dynamic> currentData = {
+      'fileName1': _fileName1,
+      'fileName2': _fileName2,
+
+    };
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MedicalInquiry2(
+          onSave: widget.onSave,
+          previousData: {
+            ...widget.previousData,
+            ...currentData,
+          },
+        ),
+      ),
+    );
+  }
 
   void _saveForm() async {
     if (_isSaving) return;
@@ -278,13 +308,12 @@ class _MedicalInquiry3State extends State<MedicalInquiry3> {
                   children: [
                     //TODO : previous button function does not create.
                     ElevatedButton(
-                      onPressed: _isSaving ? null : _saveForm,
+                      onPressed: _navigateToPrevious,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: TColor.maincolor,
+                        padding: EdgeInsets.symmetric(horizontal: 36, vertical: 10),
                       ),
-                      child: _isSaving
-                          ? CircularProgressIndicator()
-                          : Text(
+                      child: Text(
                         'Previous',
                         style: TextStyle(
                           color: TColor.textcolor,
@@ -297,6 +326,7 @@ class _MedicalInquiry3State extends State<MedicalInquiry3> {
                       onPressed: _isSaving ? null : _saveForm,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: TColor.maincolor,
+                        padding: EdgeInsets.symmetric(horizontal: 36, vertical: 10),
                       ),
                       child: _isSaving
                           ? CircularProgressIndicator()

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:srifitness_app/pages/form/medical_inquiry_1.dart';
 import 'package:srifitness_app/pages/form/medical_inquiry_3.dart';
 import 'package:srifitness_app/widget/colo_extension.dart';
 import 'package:srifitness_app/widget/custom_appbar.dart';
@@ -31,17 +32,41 @@ class _MedicalInquiry2State extends State<MedicalInquiry2> {
   String? _selectedMigraine;
   String? _selectedSurgery;
   String? _fileName;
+
   bool _isSaving = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadSavedData();
-  }
+
+
+  // void _clearFormData() {
+  //   setState(() {
+  //     _selectedBackPain = null;
+  //     _selectedAsthma = null;
+  //     _selectedDiabetes = null;
+  //     _selectedFinishedMedication = null;
+  //     _selectedPrescribedMedtication = null;
+  //     _selectedMigraine = null;
+  //     _selectedSurgery = null;
+  //     _fileName = null;
+  //   });
+  // }
 
   Future<void> _loadSavedData() async {
-    final savedData = await _prefs.getFormData(SharedPreferenceHelper.medicalInquiry2Key);
-    if (savedData != null) {
+    try {
+
+      final savedData = await _prefs.getFormData(SharedPreferenceHelper.medicalInquiry2Key);
+      if (savedData == null || savedData.isEmpty) {
+
+        return;
+      }
+
+      // Check if this is first time form access
+      final isFirstAccess = await _prefs.getFormData('medical2FirstAccess');
+      if (isFirstAccess == null) {
+        // _clearFormData();
+        await _prefs.saveFormData('medical2FirstAccess', {'accessed': true});
+        return;
+      }
+
       setState(() {
         _selectedBackPain = savedData['backPain'];
         _selectedAsthma = savedData['asthma'];
@@ -52,7 +77,16 @@ class _MedicalInquiry2State extends State<MedicalInquiry2> {
         _selectedSurgery = savedData['surgery'];
         _fileName = savedData['fileName'];
       });
+    } catch (e) {
+      // _clearFormData();
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedData();
+
   }
 
   void _saveForm() async {
@@ -104,6 +138,18 @@ class _MedicalInquiry2State extends State<MedicalInquiry2> {
       }
     }
   }
+
+  void _navigateToPrevious() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MedicalInquiry1(
+          onSave: widget.onSave,
+        ),
+      ),
+    );
+  }
+
 
   Widget buildDropdown({
     required String label,
@@ -214,7 +260,7 @@ class _MedicalInquiry2State extends State<MedicalInquiry2> {
                   children: [
                     //TODO : PREVIOUS BUTTON METHOD ... ?
                     ElevatedButton(
-                      onPressed: _isSaving ? null : _saveForm,
+                      onPressed: _isSaving ? null : _navigateToPrevious,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: TColor.maincolor,
                         padding: EdgeInsets.symmetric(horizontal: 36, vertical: 10),

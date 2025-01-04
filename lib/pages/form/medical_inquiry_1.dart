@@ -6,7 +6,6 @@ import 'package:srifitness_app/widget/colo_extension.dart';
 import 'package:srifitness_app/widget/custom_appbar.dart';
 import 'package:srifitness_app/service/shared_pref.dart';
 
-//TODO: PREVIOUS BUTTON
 
 class MedicalInquiry1 extends StatefulWidget {
   final Function(Map<String, dynamic>) onSave;
@@ -18,6 +17,7 @@ class MedicalInquiry1 extends StatefulWidget {
 
 class _MedicalInquiry1State extends State<MedicalInquiry1> {
   final _formKey = GlobalKey<FormState>();
+  final _prefs = SharedPreferenceHelper();
   String? _selectedHeartProblem;
   String? _selectedCirculatoryProblem;
   String? _selectedBloodPressureProblem;
@@ -25,18 +25,38 @@ class _MedicalInquiry1State extends State<MedicalInquiry1> {
   String? _selectedFeelDizzy;
   String? _selectedPregnancy;
   String? _fileName;
-  final _prefs = SharedPreferenceHelper();
   bool _isSaving = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadSavedData();
-  }
+
+  // void _clearFormData() {
+  //   setState(() {
+  //     _selectedHeartProblem = null;
+  //     _selectedCirculatoryProblem = null;
+  //     _selectedBloodPressureProblem = null;
+  //     _selectedJointMovementProblem = null;
+  //     _selectedFeelDizzy = null;
+  //     _selectedPregnancy = null;
+  //     _fileName = null;
+  //   });
+  // }
 
   Future<void> _loadSavedData() async {
-    final savedData = await _prefs.getFormData(SharedPreferenceHelper.medicalInquiry1Key);
-    if (savedData != null) {
+    try {
+      final savedData = await _prefs.getFormData(SharedPreferenceHelper.medicalInquiry1Key);
+
+      if (savedData == null || savedData.isEmpty) {
+        // _clearFormData();
+        return;
+      }
+
+      // Check if this is first time form access
+      final isFirstAccess = await _prefs.getFormData('isFirstAccess');
+      if (isFirstAccess == null) {
+        // _clearFormData();
+        await _prefs.saveFormData('isFirstAccess', {'accessed': true});
+        return;
+      }
+
       setState(() {
         _selectedHeartProblem = savedData['heartProblem'];
         _selectedCirculatoryProblem = savedData['circulatoryProblem'];
@@ -46,27 +66,18 @@ class _MedicalInquiry1State extends State<MedicalInquiry1> {
         _selectedPregnancy = savedData['pregnancy'];
         _fileName = savedData['fileName'];
       });
+    } catch (e) {
+      // _clearFormData();
     }
   }
 
-  // Add auto-save method
-  Future<void> _autoSaveForm() async {
-    Map<String, dynamic> formData = {
-      'heartProblem': _selectedHeartProblem,
-      'circulatoryProblem': _selectedCirculatoryProblem,
-      'bloodPressureProblem': _selectedBloodPressureProblem,
-      'jointMovementProblem': _selectedJointMovementProblem,
-      'feelDizzy': _selectedFeelDizzy,
-      'pregnancy': _selectedPregnancy,
-      'fileName': _fileName,
-      'timestamp': DateTime.now().toIso8601String(),
-    };
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedData();
 
-    await _prefs.saveFormData(
-        SharedPreferenceHelper.medicalInquiry1Key,
-        formData
-    );
   }
+
 
   void _saveForm() async {
     if (_isSaving) return;
@@ -218,35 +229,11 @@ class _MedicalInquiry1State extends State<MedicalInquiry1> {
                   ),
                 ),
                 SizedBox(height: 40),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-//TODO: PREVIOUS BUTTON
-                        ElevatedButton(
-                        // onPressed: _isSaving ? null : _saveForm,
-                          onPressed: () {
-                            //TODO: THIS FUNCTION WILL BE CALLED WHEN THE BUTTON IS PRESSED
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: TColor.maincolor,
-                          padding: EdgeInsets.symmetric(horizontal: 36, vertical: 10),
-                        ),
-                        child: _isSaving
-                            ? CircularProgressIndicator()
-                            : Text(
-                          'Previous',
-                          style: TextStyle(
-                            color: TColor.textcolor,
-                            fontWeight: FontWeight.w400,
-                            fontSize:18,
-                          ),
-                        ),
-                        ),
-                      ],
-                    ),
-                    ElevatedButton(
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: ElevatedButton(
                       onPressed: _isSaving ? null : _saveForm,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: TColor.maincolor,
@@ -255,15 +242,15 @@ class _MedicalInquiry1State extends State<MedicalInquiry1> {
                       child: _isSaving
                           ? CircularProgressIndicator()
                           : Text(
-                              'Next',
-                              style: TextStyle(
-                                color: TColor.textcolor,
-                                fontWeight: FontWeight.w400,
-                                fontSize:18,
-                              ),
-                            ),
+                        'Next',
+                        style: TextStyle(
+                          color: TColor.textcolor,
+                          fontWeight: FontWeight.w400,
+                          fontSize: 18,
+                        ),
+                      ),
                     ),
-                  ],
+                  ),
                 ),
               ],
             ),
@@ -273,6 +260,7 @@ class _MedicalInquiry1State extends State<MedicalInquiry1> {
     );
   }
 
+  //TODO: pick file method to upload image or pdf file  (not working)
   Future<void> _pickFile() async {
     try {
       if (kIsWeb) {
@@ -290,13 +278,16 @@ class _MedicalInquiry1State extends State<MedicalInquiry1> {
       );
 
       if (result != null && result.files.isNotEmpty) {
-        if (result != null && result.files.isNotEmpty) {
-          setState(() {
-            _fileName = result.files.single.name;
-          });
-          await _autoSaveForm(); // Auto-save when file is picked
-        }
         final file = result.files.first;
+
+        // Validate file extension
+        final extension = file.extension?.toLowerCase();
+        if (!['jpg', 'jpeg', 'png', 'pdf'].contains(extension)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Please select a valid image or PDF file')),
+          );
+          return;
+        }
 
         // Check file size (limit to 10MB)
         if (file.size > 10 * 1024 * 1024) {
@@ -309,6 +300,9 @@ class _MedicalInquiry1State extends State<MedicalInquiry1> {
         setState(() {
           _fileName = file.name;
         });
+
+
+
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('File uploaded successfully: ${file.name}')),
@@ -356,9 +350,7 @@ class _MedicalInquiry1State extends State<MedicalInquiry1> {
           child: Text(option),
         );
       }).toList(),
-      onChanged: (value) {
-        onChanged(value);
-        _autoSaveForm(); }, // Auto-save when dropdown value changes
+      onChanged: onChanged,
       validator: (value) {
         if (value == null) {
           return 'Please select an option';

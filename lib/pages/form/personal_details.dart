@@ -64,46 +64,80 @@ class _PersonalDetailsState extends State<PersonalDetails> {
   // }
 
   Future<void> _loadSavedData() async {
-    final savedData = await _prefs.getFormData(SharedPreferenceHelper.personalDetailsKey);
-    if (savedData != null && savedData['fullName'] != null && savedData['fullName'].toString().isNotEmpty) {
-      setState(() {
-        _fullNameController.text = savedData['fullName'] ?? '';
-        if (savedData['dateOfBirth'] != null) {
-          _selectedDate = DateTime.parse(savedData['dateOfBirth']);
-        }
-        _selectedGender = savedData['gender'];
-        _addressController.text = savedData['address'] ?? '';
-        _townController.text = savedData['town'] ?? '';
-        _telHomeController.text = savedData['telHome'] ?? '';
-        _telMobileController.text = savedData['telMobile'] ?? '';
-        _emergencyContactController.text = savedData['emergencyContact'] ?? '';
-      });
-    } else {
-      // Clear the text field for new users
-      setState(() {
-        _fullNameController.text = '';
+    try {
+      User? currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        _clearFormData();
+        return;
+      }
 
-      });
+      // Check if user data exists in Firestore
+      final userDoc = await FirebaseFirestore.instance
+          .collection('user-details')
+          .doc(currentUser.uid)
+          .collection('personal-details')
+          .doc('info')
+          .get();
+
+      if (!userDoc.exists) {
+        // New user - clear the form
+        _clearFormData();
+        return;
+      }
+
+      // Existing user - load their data
+      final savedData = await _prefs.getFormData(SharedPreferenceHelper.personalDetailsKey);
+      if (savedData != null) {
+        setState(() {
+          _fullNameController.text = savedData['fullName'] ?? '';
+          if (savedData['dateOfBirth'] != null) {
+            _selectedDate = DateTime.parse(savedData['dateOfBirth']);
+          }
+          _selectedGender = savedData['gender'];
+          _addressController.text = savedData['address'] ?? '';
+          _townController.text = savedData['town'] ?? '';
+          _telHomeController.text = savedData['telHome'] ?? '';
+          _telMobileController.text = savedData['telMobile'] ?? '';
+          _emergencyContactController.text = savedData['emergencyContact'] ?? '';
+        });
+      }
+    } catch (e) {
+      print('Error loading saved data: $e');
+      _clearFormData();
     }
   }
 
-  Future<void> _autoSaveForm() async {
-    Map<String, dynamic> formData = {
-      'fullName': _fullNameController.text,
-      'dateOfBirth': _selectedDate?.toIso8601String(),
-      'gender': _selectedGender,
-      'address': _addressController.text,
-      'town': _townController.text,
-      'telHome': _telHomeController.text,
-      'telMobile': _telMobileController.text,
-      'emergencyContact': _emergencyContactController.text,
-    };
-
-    await _prefs.saveFormData(
-        SharedPreferenceHelper.personalDetailsKey,
-        formData
-    );
+  void _clearFormData() {
+    setState(() {
+      _fullNameController.text = '';
+      _selectedDate = null;
+      _selectedGender = null;
+      _addressController.text = '';
+      _townController.text = '';
+      _telHomeController.text = '';
+      _telMobileController.text = '';
+      _emergencyContactController.text = '';
+    });
   }
+
+
+  // Future<void> _autoSaveForm() async {
+  //   Map<String, dynamic> formData = {
+  //     'fullName': _fullNameController.text,
+  //     'dateOfBirth': _selectedDate?.toIso8601String(),
+  //     'gender': _selectedGender,
+  //     'address': _addressController.text,
+  //     'town': _townController.text,
+  //     'telHome': _telHomeController.text,
+  //     'telMobile': _telMobileController.text,
+  //     'emergencyContact': _emergencyContactController.text,
+  //   };
+  //
+  //   await _prefs.saveFormData(
+  //       SharedPreferenceHelper.personalDetailsKey,
+  //       formData
+  //   );
+  // }
 
   final Color _errorColor = Colors.red;
 

@@ -68,13 +68,41 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     if (savedData != null && savedData['fullName'] != null && savedData['fullName'].toString().isNotEmpty) {
       setState(() {
         _fullNameController.text = savedData['fullName'] ?? '';
+        if (savedData['dateOfBirth'] != null) {
+          _selectedDate = DateTime.parse(savedData['dateOfBirth']);
+        }
+        _selectedGender = savedData['gender'];
+        _addressController.text = savedData['address'] ?? '';
+        _townController.text = savedData['town'] ?? '';
+        _telHomeController.text = savedData['telHome'] ?? '';
+        _telMobileController.text = savedData['telMobile'] ?? '';
+        _emergencyContactController.text = savedData['emergencyContact'] ?? '';
       });
     } else {
       // Clear the text field for new users
       setState(() {
         _fullNameController.text = '';
+
       });
     }
+  }
+
+  Future<void> _autoSaveForm() async {
+    Map<String, dynamic> formData = {
+      'fullName': _fullNameController.text,
+      'dateOfBirth': _selectedDate?.toIso8601String(),
+      'gender': _selectedGender,
+      'address': _addressController.text,
+      'town': _townController.text,
+      'telHome': _telHomeController.text,
+      'telMobile': _telMobileController.text,
+      'emergencyContact': _emergencyContactController.text,
+    };
+
+    await _prefs.saveFormData(
+        SharedPreferenceHelper.personalDetailsKey,
+        formData
+    );
   }
 
   final Color _errorColor = Colors.red;

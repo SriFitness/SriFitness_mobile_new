@@ -44,6 +44,13 @@ class _MedicalInquiry2State extends State<MedicalInquiry2> {
     if (savedData != null) {
       setState(() {
         _selectedBackPain = savedData['backPain'];
+        _selectedAsthma = savedData['asthma'];
+        _selectedDiabetes = savedData['diabetes'];
+        _selectedFinishedMedication = savedData['finishedMedication'];
+        _selectedPrescribedMedtication = savedData['prescribedMedication'];
+        _selectedMigraine = savedData['migraine'];
+        _selectedSurgery = savedData['surgery'];
+        _fileName = savedData['fileName'];
       });
     }
   }

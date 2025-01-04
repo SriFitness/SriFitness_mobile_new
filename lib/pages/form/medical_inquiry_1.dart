@@ -39,8 +39,33 @@ class _MedicalInquiry1State extends State<MedicalInquiry1> {
     if (savedData != null) {
       setState(() {
         _selectedHeartProblem = savedData['heartProblem'];
+        _selectedCirculatoryProblem = savedData['circulatoryProblem'];
+        _selectedBloodPressureProblem = savedData['bloodPressureProblem'];
+        _selectedJointMovementProblem = savedData['jointMovementProblem'];
+        _selectedFeelDizzy = savedData['feelDizzy'];
+        _selectedPregnancy = savedData['pregnancy'];
+        _fileName = savedData['fileName'];
       });
     }
+  }
+
+  // Add auto-save method
+  Future<void> _autoSaveForm() async {
+    Map<String, dynamic> formData = {
+      'heartProblem': _selectedHeartProblem,
+      'circulatoryProblem': _selectedCirculatoryProblem,
+      'bloodPressureProblem': _selectedBloodPressureProblem,
+      'jointMovementProblem': _selectedJointMovementProblem,
+      'feelDizzy': _selectedFeelDizzy,
+      'pregnancy': _selectedPregnancy,
+      'fileName': _fileName,
+      'timestamp': DateTime.now().toIso8601String(),
+    };
+
+    await _prefs.saveFormData(
+        SharedPreferenceHelper.medicalInquiry1Key,
+        formData
+    );
   }
 
   void _saveForm() async {
@@ -248,24 +273,71 @@ class _MedicalInquiry1State extends State<MedicalInquiry1> {
     );
   }
 
-
   Future<void> _pickFile() async {
-    if (kIsWeb) {
-      print('File picking is not supported on the web.');
-      return;
-    }
+    try {
+      if (kIsWeb) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('File picking is not supported on web')),
+        );
+        return;
+      }
 
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
-    );
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
+        allowMultiple: false,
+        withData: true,
+      );
 
-    if (result != null && result.files.isNotEmpty) {
-      setState(() {
-        _fileName = result.files.single.name;
-      });
+      if (result != null && result.files.isNotEmpty) {
+        if (result != null && result.files.isNotEmpty) {
+          setState(() {
+            _fileName = result.files.single.name;
+          });
+          await _autoSaveForm(); // Auto-save when file is picked
+        }
+        final file = result.files.first;
+
+        // Check file size (limit to 10MB)
+        if (file.size > 10 * 1024 * 1024) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('File size should be less than 10MB')),
+          );
+          return;
+        }
+
+        setState(() {
+          _fileName = file.name;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('File uploaded successfully: ${file.name}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error picking file: $e')),
+      );
     }
   }
+
+  // Future<void> _pickFile() async {
+  //   if (kIsWeb) {
+  //     print('File picking is not supported on the web.');
+  //     return;
+  //   }
+  //
+  //   final result = await FilePicker.platform.pickFiles(
+  //     type: FileType.custom,
+  //     allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
+  //   );
+  //
+  //   if (result != null && result.files.isNotEmpty) {
+  //     setState(() {
+  //       _fileName = result.files.single.name;
+  //     });
+  //   }
+  // }
   Widget buildDropdown({
     required String label,
     required String? value,
@@ -284,7 +356,9 @@ class _MedicalInquiry1State extends State<MedicalInquiry1> {
           child: Text(option),
         );
       }).toList(),
-      onChanged: onChanged,
+      onChanged: (value) {
+        onChanged(value);
+        _autoSaveForm(); }, // Auto-save when dropdown value changes
       validator: (value) {
         if (value == null) {
           return 'Please select an option';

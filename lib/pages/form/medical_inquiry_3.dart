@@ -27,7 +27,8 @@ class MedicalInquiry3 extends StatefulWidget {
 class _MedicalInquiry3State extends State<MedicalInquiry3> {
   final _formKey = GlobalKey<FormState>();
   final _prefs = SharedPreferenceHelper();
-  String? _fileName;
+  String? _fileName1;
+  String? _fileName2;
 
   final TextStyle _textStyle = TextStyle(
     fontSize: 16,
@@ -37,17 +38,70 @@ class _MedicalInquiry3State extends State<MedicalInquiry3> {
   bool _isSaving = false;
 
   //TODO : file picking not working
-  Future<void> _pickFile() async {
+  // Create two separate file picker methods
+  Future<void> _pickFile1() async {
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['jpg', 'pdf', 'png'],
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
+        allowMultiple: false,
+        withData: true,
       );
 
-      if (result != null) {
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.first;
+
+        // Check file size (limit to 10MB)
+        if (file.size > 10 * 1024 * 1024) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('File size should be less than 10MB')),
+          );
+          return;
+        }
+
         setState(() {
-          _fileName = result.files.single.name;
+          _fileName1 = file.name;
         });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('File 1 uploaded successfully: ${file.name}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error picking file: $e')),
+      );
+    }
+  }
+
+  Future<void> _pickFile2() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
+        allowMultiple: false,
+        withData: true,
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.first;
+
+        if (file.size > 10 * 1024 * 1024) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('File size should be less than 10MB')),
+          );
+          return;
+        }
+
+        setState(() {
+          _fileName2 = file.name;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('File 2 uploaded successfully: ${file.name}')),
+        );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -81,7 +135,8 @@ class _MedicalInquiry3State extends State<MedicalInquiry3> {
 
       try {
         Map<String, dynamic> medicalInquiry3Data = {
-          'fileName': _fileName,
+          'fileName1': _fileName1,
+          'fileName2': _fileName2,
           'timestamp': DateTime.now().toIso8601String(),
         };
 
@@ -152,12 +207,12 @@ class _MedicalInquiry3State extends State<MedicalInquiry3> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: ElevatedButton(
-                    onPressed: _pickFile,
+                    onPressed: _pickFile1,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: TColor.defaultblackcolor,
                     ),
                     child: Text(
-                      _fileName ?? 'Upload Image or PDF',
+                      _fileName1 ?? 'Upload Image or PDF',
                       style: TextStyle(
                         color: TColor.textcolor,
                         fontWeight: FontWeight.w400,
@@ -203,12 +258,12 @@ class _MedicalInquiry3State extends State<MedicalInquiry3> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: ElevatedButton(
-                    onPressed: _pickFile,
+                    onPressed: _pickFile2,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: TColor.defaultblackcolor,
                     ),
                     child: Text(
-                      _fileName ?? 'Upload Image or PDF',
+                      _fileName2 ?? 'Upload Image or PDF',
                       style: TextStyle(
                         color: TColor.textcolor,
                         fontWeight: FontWeight.w400,

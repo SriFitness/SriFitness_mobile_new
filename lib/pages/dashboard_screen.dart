@@ -1,8 +1,8 @@
 
 import 'package:flutter/material.dart';
-import 'package:srifitness_app/components/calendar_streak.dart';
+import 'package:srifitness_app/pages/home/calendar_streak.dart';
 import 'package:srifitness_app/components/weight_section.dart';
-import 'package:srifitness_app/components/bmi_section.dart';
+import 'package:srifitness_app/pages/home/bmi_section.dart';
 class DashboardScreen extends StatelessWidget {
 @override
 Widget build(BuildContext context) {
@@ -24,11 +24,11 @@ padding: EdgeInsets.all(16),
 child: Column(
 crossAxisAlignment: CrossAxisAlignment.start,
 children: [
-CalendarStreak(),
+// CalendarStreak(),
 SizedBox(height: 24),
 WeightSection(),
 SizedBox(height: 24),
-BMISection(),
+// BMISection(),
 ],
 ),
 ),

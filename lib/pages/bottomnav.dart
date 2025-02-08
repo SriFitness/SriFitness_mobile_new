@@ -1,6 +1,6 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:srifitness_app/pages/home.dart';
+import 'package:srifitness_app/pages/home/home.dart';
 import 'package:srifitness_app/pages/marketplace/marketplace.dart';
 import 'package:srifitness_app/pages/profile.dart';
 import 'package:srifitness_app/workout/workout_view.dart';

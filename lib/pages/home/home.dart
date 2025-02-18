@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
+import 'dart:ui';
+
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:srifitness_app/pages/home/bmi_section.dart';
 import 'package:srifitness_app/pages/home/calendar_streak.dart';
-import 'dart:ui';
 
 class Home extends StatelessWidget {
   // Function to get the logged-in user's unique ID from Firebase
@@ -17,31 +18,19 @@ class Home extends StatelessWidget {
     }
   }
 
-  // Store attendance in Firestore with timestamp
-  Future<void> storeAttendance(String userId, DateTime scanTime) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('user-details')
-          .doc(userId)
-          .collection('attendance') // Sub-collection for attendance entries
-          .add({
-        'scan_time': scanTime,
-        'date': scanTime.toLocal().toIso8601String().split('T').first,
-      });
-      print('Attendance successfully recorded!');
-    } catch (e) {
-      print('Error recording attendance: $e');
-    }
-  }
   // Show QR Code Dialog
   void showQRDialog(BuildContext context, String userId) {
+    String qrData =
+        '{"uid": "$userId", "gym": "gym001", "timestamp": "${DateTime.now().toIso8601String()}"}';
+
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
       barrierColor: Colors.transparent,
       transitionDuration: const Duration(milliseconds: 200),
-      pageBuilder: (BuildContext buildContext, Animation animation, Animation secondaryAnimation) {
+      pageBuilder: (BuildContext buildContext, Animation animation,
+          Animation secondaryAnimation) {
         return Center(
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
@@ -56,7 +45,7 @@ class Home extends StatelessWidget {
                 child: Container(
                   color: Colors.white,
                   child: PrettyQr(
-                    data: userId,
+                    data: qrData,
                     size: 250,
                     roundEdges: true,
                   ),
@@ -86,7 +75,8 @@ class Home extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.only(left: 12, right: 16, top: 5, bottom: 8),
+              padding:
+                  const EdgeInsets.only(left: 12, right: 16, top: 5, bottom: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -103,10 +93,6 @@ class Home extends StatelessWidget {
                       String userId = getLoggedInUserId();
                       if (userId != "No user logged in") {
                         DateTime scanTime = DateTime.now();
-
-                        // Save attendance to Firestore
-                        await storeAttendance(userId, scanTime);
-
                         // Show the QR code dialog
                         showQRDialog(context, userId);
                       } else {
@@ -124,6 +110,32 @@ class Home extends StatelessWidget {
             BMISection(),
             const SizedBox(height: 24),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class QRCodePage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return Center(child: Text("User not logged in"));
+    }
+
+    // QR Code Data
+    final qrData =
+        '{"uid": "${user.uid}", "gym": "gym001", "timestamp": "${DateTime.now().toIso8601String()}"}';
+
+    return Scaffold(
+      appBar: AppBar(title: Text("My QR Code")),
+      body: Center(
+        child: QrImageView(
+          data: qrData,
+          version: QrVersions.auto,
+          size: 200.0,
         ),
       ),
     );

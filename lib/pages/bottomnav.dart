@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:srifitness_app/pages/home/home.dart';
 import 'package:srifitness_app/pages/marketplace/marketplace.dart';
 import 'package:srifitness_app/pages/profile.dart';
-import 'package:srifitness_app/workout/workout_view.dart';
+import 'package:srifitness_app/workout/workout_plan_section.dart';
 
 class BottomNav extends StatefulWidget {
   const BottomNav({super.key});
@@ -19,14 +19,14 @@ class _BottomNavState extends State<BottomNav> {
   late Widget currentPage;
   late Home homepage;
   late Marketplace marketplace;
-  late WorkoutView workoutView;
+  late WorkoutPlansSection workoutView;
   late Profile profile;
 
   @override
   void initState() {
     homepage = Home();
     marketplace = Marketplace();
-    workoutView = WorkoutView();
+    workoutView = WorkoutPlansSection();
     profile = Profile();
     pages = [homepage, marketplace, workoutView, profile];
     super.initState();

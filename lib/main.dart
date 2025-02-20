@@ -1,16 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:srifitness_app/models/cart_model.dart';
 import 'package:srifitness_app/pages/bottomnav.dart';
-import 'package:srifitness_app/pages/form/personal_details.dart';
-import 'package:srifitness_app/pages/form/medical_inquiry_1.dart';
-import 'package:srifitness_app/pages/login.dart';
 import 'package:srifitness_app/pages/forgotpassword.dart';
+import 'package:srifitness_app/pages/form/medical_inquiry_1.dart';
+import 'package:srifitness_app/pages/form/personal_details.dart';
+import 'package:srifitness_app/pages/login.dart';
 import 'package:srifitness_app/widget/colo_extension.dart';
-import 'package:srifitness_app/workout/workout_plan_section.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -92,7 +91,9 @@ class HomeScreen extends StatelessWidget {
                       if (!isPasswordReset) {
                         return const ResetPassword();
                       } else if (!isFormSubmitted) {
-                        return PersonalDetails(onSave: (personalDetails) => _savePersonalDetails(context, personalDetails));
+                        return PersonalDetails(
+                            onSave: (personalDetails) =>
+                                _savePersonalDetails(context, personalDetails));
                       } else {
                         return const BottomNav();
                       }
@@ -113,7 +114,8 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  void _savePersonalDetails(BuildContext context, Map<String, dynamic> personalDetails) async {
+  void _savePersonalDetails(
+      BuildContext context, Map<String, dynamic> personalDetails) async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       await FirebaseFirestore.instance
@@ -129,12 +131,16 @@ class HomeScreen extends StatelessWidget {
           .update({'isFormSubmitted': true});
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => MedicalInquiry1(onSave: (medicalInquiries) => _saveMedicalInquiries(context, medicalInquiries))),
+        MaterialPageRoute(
+            builder: (context) => MedicalInquiry1(
+                onSave: (medicalInquiries) =>
+                    _saveMedicalInquiries(context, medicalInquiries))),
       );
     }
   }
 
-  void _saveMedicalInquiries(BuildContext context, Map<String, dynamic> medicalInquiries) async {
+  void _saveMedicalInquiries(
+      BuildContext context, Map<String, dynamic> medicalInquiries) async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       await FirebaseFirestore.instance
@@ -145,13 +151,7 @@ class HomeScreen extends StatelessWidget {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const BottomNav()),
-
       );
     }
   }
 }
-
-
-
-
-

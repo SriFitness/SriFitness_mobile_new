@@ -20,8 +20,7 @@ class Home extends StatelessWidget {
 
   // Show QR Code Dialog
   void showQRDialog(BuildContext context, String userId) {
-    String qrData =
-        '{"uid": "$userId", "gym": "gym001", "timestamp": "${DateTime.now().toIso8601String()}"}';
+    String qrData = userId;
 
     showGeneralDialog(
       context: context,
@@ -91,6 +90,7 @@ class Home extends StatelessWidget {
                     icon: Icon(Icons.qr_code, size: 38, color: Colors.white),
                     onPressed: () async {
                       String userId = getLoggedInUserId();
+
                       if (userId != "No user logged in") {
                         DateTime scanTime = DateTime.now();
                         // Show the QR code dialog
@@ -127,7 +127,8 @@ class QRCodePage extends StatelessWidget {
 
     // QR Code Data
     final qrData =
-        '{"uid": "${user.uid}", "gym": "gym001", "timestamp": "${DateTime.now().toIso8601String()}"}';
+        // '{"uid": "${user.uid}", "gym": "gym001", "timestamp": "${DateTime.now().toIso8601String()}"}';
+        '{"uid": "${user.uid}"}';
 
     return Scaffold(
       appBar: AppBar(title: Text("My QR Code")),
